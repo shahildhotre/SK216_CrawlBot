@@ -15,6 +15,17 @@ from stem.control import Controller
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 from bs4.element import Comment
+import pandas as pd
+import sys
+
+###############################################################################
+
+keyword = ''
+for word in sys.argv[:-1]:
+    keyword += word + ' '
+number = int(sys.argv[-1])
+print(keyword)
+print(number)
 
 ###############################################################################
 '''socks proxies required for TOR usage'''
@@ -143,7 +154,7 @@ countpage = 1
 countlink = 1
 
 try:
-    while (len(urlq) != 0 and countpage != 50) :
+    while (len(urlq) != 0 and countpage != number) :
         
         '''pop url from queue'''
         url = urlq.popleft()
@@ -172,8 +183,10 @@ try:
                         
             '''links availab on current web page'''
             links = [urllib.parse.urljoin(response.url, url) for url in body.xpath('//a/@href')]
-            
+            count_link = 0        
             for link in links:
+                if count_link == 10:
+                    break
                 if link not in found:
                     urlq.append(link)
                     found.add(link)
@@ -184,6 +197,13 @@ try:
         '''Obtain new IP using TOR'''
         renew_tor_ip()
             
+    final_list = list(found)
+    data = {'Links' : final_list}
+    df = pd.DataFrame(final_list)
+    df.to_csv('crawledlinks.csv', header= False)
+
+    
+    
 except Exception as e:
 	print(str(e))
 
