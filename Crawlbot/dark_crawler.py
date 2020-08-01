@@ -230,7 +230,7 @@ try:
 			
             count_link = 0
             for link in links:
-				if count_link == 10:
+		if count_link == 10:
                     break
                 if link not in found:
                     urlq.append(link)
@@ -242,7 +242,7 @@ try:
         '''Obtain new IP using TOR'''
         renew_tor_ip()
         
-	final_list = list(found)
+    final_list = list(found)
     data = {'Links' : final_list}
     df = pd.DataFrame(final_list)
     df.to_csv('crawledlinks.csv', header= False)
