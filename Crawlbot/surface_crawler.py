@@ -18,7 +18,9 @@ from bs4.element import Comment
 import pandas as pd
 import sys
 
-###############################################################################
+import mysql.connector
+from mysql.connector import Error
+
 
 keyword = ''
 for word in sys.argv[:-1]:
@@ -26,26 +28,29 @@ for word in sys.argv[:-1]:
 number = int(sys.argv[-1])
 print(keyword)
 print(number)
-
+'''
+keyword = 'surface_crawler.py porn'
+number = 5
+'''
 ###############################################################################
 '''socks proxies required for TOR usage'''
-proxies = { 'http' : 'socks5h://127.0.0.1:9050', 
+proxies = { 'http' : 'socks5h://127.0.0.1:9050',
             'https' : 'socks5h://127.0.0.1:9050'}
 
 ###############################################################################
 def get_current_ip():
-	try:
-		r = requests.get('http://httpbin.org/ip', proxies = proxies)
-	except Exception as e:
-		print (str(e))
-	else:
-		return r.text.split(",")[-1].split('"')[3]
+    try:
+        r = requests.get('http://httpbin.org/ip', proxies = proxies)
+    except Exception as e:
+        print (str(e))
+    else:
+        return r.text.split(",")[-1].split('"')[3]
 
 ###############################################################################
 def renew_tor_ip():
-	with Controller.from_port(port = 9051) as controller:
-		controller.authenticate(password="vjtifyp")
-		controller.signal(Signal.NEWNYM)
+    with Controller.from_port(port = 9051) as controller:
+        controller.authenticate(password="Mihir@1998")
+        controller.signal(Signal.NEWNYM)
 
 ###############################################################################
 def is_alive(url):
@@ -62,9 +67,9 @@ def is_alive(url):
         print("Page not found..." + url )
         return False
     else:
-        print("Page found....")		
+        print("Page found....")
         return True
-		
+
 ###############################################################################
 def tag_visible(element):
     if element.parent.name in ['style', 'script','meta', '[document]']:
@@ -77,20 +82,20 @@ def tag_visible(element):
 def text_from_html(body):
     soup = BeautifulSoup(body, 'html.parser')
     texts = soup.findAll(text=True)
-    visible_texts = filter(tag_visible, texts)  
+    visible_texts = filter(tag_visible, texts)
     return u" ".join(t.strip() for t in visible_texts)
 
 ###############################################################################
-    
+
 class SeedUrlCollector():
-    
-    proxies = {'http' : 'socks5h://127.0.0.1:9050', 
+
+    proxies = {'http' : 'socks5h://127.0.0.1:9050',
                'https' : 'socks5h://127.0.0.1:9050'}
-    
+
     ua = UserAgent()
     user_agent = ua.random
     headers = {'User-Agent': user_agent}
-    
+
     def __init__(self, query):
         self.query = query
 
@@ -99,10 +104,10 @@ class SeedUrlCollector():
         USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0"
         query = '+'.join(self.query.split(' '))
         url = "https://google.com/search?q={}".format(query)
-        
+
         headers = {"user-agent": USER_AGENT}
         resp = requests.get(url, headers=headers)
-        
+
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.content, "html.parser")
             seedurllist = []
@@ -121,17 +126,23 @@ try:
 except:
     pass
 ###############################################################################
-
-from cfonts import render
-
-output = render('Crawlbot', colors=['red', 'yellow'], align='center')
-print(output)
-print('\n\n')
+'''Database Connection'''
+connection = mysql.connector.connect(host='localhost',
+                                     port=3308,
+                                     database='sih',
+                                     user='root',
+                                     password='')
+if connection.is_connected():
+    db_Info = connection.get_server_info()
+    print("Connected to MySQL Server version ", db_Info)
+    cursor = connection.cursor()
 ###############################################################################
 '''Setting up seed urls'''
 
-query = 'child abuse'
-    
+query = keyword[19:]
+print(query)
+sql_surface = """INSERT INTO surface(`link_url`, `link_status`) VALUES(%s,%s)"""
+
 # Create class object
 suc = SeedUrlCollector(query)
 # Call class methods
@@ -148,63 +159,64 @@ for link in googlelinks:
 
 ###############################################################################
 # number of pages to visit in one crawling session
-countpage = 1
+countpage = 0
 
 # number of total links harvested during crawling
 countlink = 1
 
 try:
-    while (len(urlq) != 0 and countpage != number) :
-        
+    while (len(urlq) != 0 and countpage < number) :
+
         '''pop url from queue'''
         url = urlq.popleft()
-                
+
         '''IP spoofing'''
         current_ip = get_current_ip()
         print("IP : {}".format(current_ip))
         print("{}. Crawling {}".format(str(countpage), url))
-        
+
 
         '''if link is active, visit link '''
         if is_alive(url):
-            
+
             countpage += 1
-            
+
             '''user agent spoofing'''
             ua = UserAgent()
             user_agent = ua.random
             headers = {'User-Agent': user_agent}
             print("User Agent is : {}".format(user_agent))
-                        
+
             '''send request to chosen site'''
             response = requests.get(url, proxies = proxies, headers = headers)
             body = html.fromstring(response.content)
             result = etree.tostring(body, pretty_print=True, method="html")
-                        
+
             '''links availab on current web page'''
             links = [urllib.parse.urljoin(response.url, url) for url in body.xpath('//a/@href')]
-            count_link = 0        
+            count_link = 0
             for link in links:
-                if count_link == 10:
+                if count_link > 50:
                     break
                 if link not in found:
                     urlq.append(link)
                     found.add(link)
-                    
+                    try:
+                        cursor.execute(sql_surface,(link,'Active',))
+                        connection.commit()
+                    except:
+                        pass
                     print (str(countlink) +"{:<5}".format(" ")+ link, end= "\n\n" )
                     countlink += 1
-                    
+
+        else:
+            cursor.execute(sql_surface,(url,'Inactive'))
+            connection.commit()
+
         '''Obtain new IP using TOR'''
         renew_tor_ip()
-            
-    final_list = list(found)
-    data = {'Links' : final_list}
-    df = pd.DataFrame(final_list)
-    df.to_csv('crawledlinks.csv', header= False)
 
-    
-    
 except Exception as e:
-	print(str(e))
+    print(str(e))
 
 ###############################################################################
