@@ -1,6 +1,17 @@
 <?php
 session_start();
-#error_reporting(E_ERROR | E_WARNING | E_PARSE);
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+$dbServername = "localhost:3308";
+$dbUsername = "root";
+$dbPassword = "";
+$dbName = "sih";
+
+$conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName);
+
+$sql_delete1 = "TRUNCATE TABLE dark";
+mysqli_query($conn,$sql_delete1);
+$sql_delete2 = "TRUNCATE TABLE surface";
+mysqli_query($conn,$sql_delete2);
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +31,6 @@ session_start();
 			},5000)
 		})
 	</script>
-
 </head>
 <body>
 <h1>CrawlBot</h1>
