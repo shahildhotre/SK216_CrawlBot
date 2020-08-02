@@ -18,6 +18,15 @@ from bs4.element import Comment
 import pandas as pd
 
 ###############################################################################
+
+keyword = ''
+for word in sys.argv[:-1]:
+    keyword += word + ' '
+number = int(sys.argv[-1])
+print(keyword)
+print(number)
+
+###############################################################################
 '''socks proxies required for TOR usage'''
 proxies = { 'http' : 'socks5h://127.0.0.1:9050', 
             'https' : 'socks5h://127.0.0.1:9050'}
@@ -218,8 +227,11 @@ try:
                         
             '''links availab on current web page'''
             links = [urllib.parse.urljoin(response.url, url) for url in body.xpath('//a/@href')]
-            
+			
+            count_link = 0
             for link in links:
+		if count_link == 10:
+                    break
                 if link not in found:
                     urlq.append(link)
                     found.add(link)
@@ -230,7 +242,11 @@ try:
         '''Obtain new IP using TOR'''
         renew_tor_ip()
         
-            
+    final_list = list(found)
+    data = {'Links' : final_list}
+    df = pd.DataFrame(final_list)
+    df.to_csv('crawledlinks.csv', header= False)
+        
 except Exception as e:
 	print(str(e))
 
