@@ -40,6 +40,11 @@ if($_SESSION['disp'] == 'on'){
 	$webtype = $_SESSION['type'];
 	$number = $_SESSION['num'];
 ?>
+	<form method="POST">
+		<button type="submit" name="auto"  value="yes" style="margin-left:150px; width: 180px;">Auto Crawl</button>
+	</form>
+	
+
 	<form action="web.php" method="POST">
 		<div class="container">
 		<label>Keyword Search           </label>
@@ -74,6 +79,11 @@ if($_SESSION['disp'] == 'on'){
 	$_SESSION['disp'] = 'off';
 }else{
 ?>
+
+	<form method="POST">
+		<button type="submit" name="auto"  value="yes" style="margin-left:150px; width: 180px;">Auto Crawl</button>
+	</form>
+
 	<form action="web.php" method="POST">
 		<div class="container">
 		<label>Keyword Search           </label>
@@ -111,6 +121,13 @@ function execInBackground($cmd) {
 
 <?php
 ini_set('max_execution_time', 600);
+
+if(isset($_POST['auto'])){
+	execInBackground("python surface_crawler.py pornography 1000 > out_surface.log");
+	execInBackground("python dark_crawler.py pornography 1000 > out_dark.log");
+	header("Refresh:0");
+}
+
 if(isset($_POST['submit'])){
 	$_SESSION['disp'] = 'on';
 	$key = $_POST['key'];

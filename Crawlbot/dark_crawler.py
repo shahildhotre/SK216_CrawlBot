@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Aug  1 15:10:41 2020
-
-@author: Team CrawlBot
-"""
-
 import requests
 from lxml import html,etree
 import collections
@@ -22,7 +15,7 @@ import sys
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import load_model
-from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.text import Tokenizer 
 from sklearn.feature_extraction.text import CountVectorizer
 
 import mysql.connector
@@ -91,9 +84,9 @@ def is_alive(url):
         print("Page not found..." + url )
         return False
     else:
-        print("Page has found....")
+        print("Page has found....")     
         return True
-
+        
 ###############################################################################
 def link_content(mytxt):
     p_loc=0
@@ -122,34 +115,34 @@ def link_content(mytxt):
    # new_string = ""
     addlink=""
     souplink=""
-
+    
     soup = BeautifulSoup(mytxt, 'lxml')
     string=str(soup)
     anchor = soup.findAll('a')
     p_loc=string.find('<p')
     for l in anchor:
         souplink_loc=string.find(str(l))
-
+                
         if souplink_loc > p_loc:
             link_tag.append(l.text)
             hyperlink.append(l.get('href'))
             count_anchor=count_anchor+1
-
+                
     for i in range(0, count_anchor):
                 inner=[]
                 inner.append(hyperlink[i])
-                inner.append(link_tag[i])
+                inner.append(link_tag[i])                
                 tag_zip.append(inner)
-
+            
     para = soup.find_all('p')
     string = str(para)
     occurence=string.count('href')
     val=-1
     for i in range(0, occurence):
                 val=string.find('href', val+1)
-
+        
     occurence_a=string.count('</a>')
-
+          
     for i in range(0, occurence_a):
                 loc1=string.find('<a', loc1+1)
                 loc_a.append(loc1)
@@ -157,11 +150,11 @@ def link_content(mytxt):
     for i in range(0, occurence_a):
                 loc2=string.find('</a>', loc2+1)
                 loc_aclose.append(loc2)
-
+            
     for i in range(0, occurence_a):
                 inner=[]
                 inner.append(loc_a[i])
-                inner.append(loc_aclose[i])
+                inner.append(loc_aclose[i]) 
                 range_a.append(inner)
     sort_range_a=sorted(range_a, reverse=True)
 
@@ -185,30 +178,30 @@ def link_content(mytxt):
                     inner.append(local_context_link[i])
                     inner.append(local_tag[i])
                     link_para.append(inner)
-
+                
     sort_link_para=sorted(link_para, reverse=True)
-
+            
     for j in sort_range_a:
             for k in sort_link_para:
                     if j[0] < k[0] < j[1]:
                         string=(string[0:j[0]:]+'($$$)'+ string[j[1]+4::])
-
+                        
     occurence_p=string.count('</p>')
     for i in range(0, occurence_p):
                 loc3=string.find('<p', loc3+1)
                 loc_p.append(loc3)
-
+                
     for i in range(0, occurence_p):
                 loc4=string.find('</p>', loc4+1)
                 loc_pclose.append(loc4)
-
+            
     range_p = set(zip(loc_p, loc_pclose))
     sort_range_p =sorted(range_p, reverse=True)
 
     for i in range(0, occurence):
                 loc5=string.find('($$$)', loc5+1)
                 newloc_link.append(loc5)
-
+            
     newlink_para=set(zip(newloc_link, local_context_link, local_tag))
     sort_newlink_para=sorted(newlink_para, reverse=True)
     l1 = []
@@ -217,29 +210,29 @@ def link_content(mytxt):
     for l in sort_range_p:
             for m in sort_newlink_para:
                 if l[0] < m[0] < l[1]:
-
+                        
                         newstring=string[l[0]:l[1]:]
-
+            
                         l1.append(m[1])
                         l2.append(m[2])
                         l3.append(newstring)
-
+                        
     '''append rest of the links '''
     for i in tag_zip:
         l1.append(i[0])
         l2.append(i[1])
         l3.append('')
-
+        
     '''craetion of dataframe'''
     d = {"link":l1, "anchor_text":l2, "local_text":l3}
     dfs = pd.DataFrame(data=d)
 
-
+    
     '''remove whitespaces and newline characters'''
     for ind in dfs.index:
         dfs['anchor_text'][ind] = re.sub('\t', '', dfs['anchor_text'][ind])
         dfs['anchor_text'][ind] = re.sub('\n', '', dfs['anchor_text'][ind])
-
+        
     return dfs
 
 ###############################################################################
@@ -254,21 +247,21 @@ def tag_visible(element):
 def text_from_html(body):
     soup = BeautifulSoup(body, 'html.parser')
     texts = soup.findAll(text=True)
-    visible_texts = filter(tag_visible, texts)
+    visible_texts = filter(tag_visible, texts)  
     return u" ".join(t.strip() for t in visible_texts)
 
 ###############################################################################
 def ANN_FOR_ANCHOR(df_test,df_train):
     corpus=[]
-
-    def PreprocessingOfText(input_text):
+    
+    def PreprocessingOfText(input_text):  
         input_text = [input_text[0].lower()]
         input_text = word_tokenize(input_text[0])
         tag_map = defaultdict(lambda : wn.NOUN)
         tag_map['J'] = wn.ADJ
         tag_map['V'] = wn.VERB
-        tag_map['R'] = wn.ADV
-
+        tag_map['R'] = wn.ADV 
+    
         Final_words = []
         word_Lemmatized = WordNetLemmatizer()
         for word, tag in pos_tag(input_text):
@@ -276,7 +269,7 @@ def ANN_FOR_ANCHOR(df_test,df_train):
                 word_Final = word_Lemmatized.lemmatize(word,tag_map[tag[0]])
                 Final_words.append(word_Final)
         Final_string = ' '.join(Final_words)
-        return Final_string
+        return Final_string           
 
     def preprocess(text):
         l_new=['jhj']
@@ -288,7 +281,7 @@ def ANN_FOR_ANCHOR(df_test,df_train):
 
     for i in range(len(df_test)):
         pr=preprocess([df_test["anchor_text"][i]])
-
+    
     x=df_train.Contents
     cv = CountVectorizer(max_features = 1500)
     X = cv.fit_transform(x).toarray()
@@ -299,7 +292,7 @@ def ANN_FOR_ANCHOR(df_test,df_train):
     pred=model.predict(test)
     print("3")
     df_test["Predictions"]=pred
-
+    
     for i in range(len(df_test)):
         if len(df_test["anchor_text"][i]) == 0:
             df_test["Predictions"][i]=0
@@ -309,15 +302,15 @@ def ANN_FOR_ANCHOR(df_test,df_train):
 ###############################################################################
 def ANN_FOR_PAGE(text,df_train):
     corpus=[]
-
-    def PreprocessingOfText(input_text):
+    
+    def PreprocessingOfText(input_text):  
         input_text = [input_text[0].lower()]
         input_text = word_tokenize(input_text[0])
         tag_map = defaultdict(lambda : wn.NOUN)
         tag_map['J'] = wn.ADJ
         tag_map['V'] = wn.VERB
-        tag_map['R'] = wn.ADV
-
+        tag_map['R'] = wn.ADV 
+    
         Final_words = []
         word_Lemmatized = WordNetLemmatizer()
         for word, tag in pos_tag(input_text):
@@ -325,7 +318,7 @@ def ANN_FOR_PAGE(text,df_train):
                 word_Final = word_Lemmatized.lemmatize(word,tag_map[tag[0]])
                 Final_words.append(word_Final)
         Final_string = ' '.join(Final_words)
-        return Final_string
+        return Final_string           
 
     def preprocess(text):
         l_new=['jhj']
@@ -337,7 +330,7 @@ def ANN_FOR_PAGE(text,df_train):
 
     for i in range(len(text)):
         pr=preprocess(text)
-
+    
     x=df_train.Contents
     cv = CountVectorizer(max_features = 1500)
     X = cv.fit_transform(x).toarray()
@@ -361,22 +354,22 @@ try :
 
     '''obtain seed urls'''
     query = keyword
-
+    
     '''ahmia search engine'''
     url = 'http://tordex7iie7z2wcg.onion/search?query=' + query[16:] + '&action=search'
-
+    
     ua = UserAgent()
     user_agent = ua.random
     headers = {'User-Agent': user_agent}
     r = requests.get(url, proxies = proxies, headers = headers)
     body = html.fromstring(r.content)
     links = body.xpath('//h5/a/@href')
-
-
+    
+    
     '''seed urls list'''
-    num_seed_urls = 10
+    num_seed_urls = 10     
     seed_list = links
-
+    
     '''main url queue'''
     urlq = collections.deque()
     for seed_url in seed_list :
@@ -387,7 +380,7 @@ try :
 ###############################################################################
     '''Database Connection'''
     connection = mysql.connector.connect(host='localhost',
-                                         port=3308,
+                                         port=3308, 
                                          database='sih',
                                          user='root',
                                          password='')
@@ -395,8 +388,8 @@ try :
         db_Info = connection.get_server_info()
         print("Connected to MySQL Server version ", db_Info)
         cursor = connection.cursor()
-
-###############################################################################
+        
+###############################################################################        
     found = set()
     total_links = set()
     home = set()
@@ -411,7 +404,7 @@ try :
     sql_dark = """INSERT INTO dark(`link_url`, `link_status`) VALUES(%s,%s)"""
     while len(urlq):
         try:
-
+        
             '''pop url from queue'''
             url = urlq.popleft()
             if url in crawled:
@@ -428,47 +421,47 @@ try :
                 user_agent = ua.random
                 headers = {'User-Agent': user_agent}
                 print("User Agent is :   ", user_agent)
-
+                
                 '''send request to given site'''
                 response = requests.get(url, proxies = proxies, headers = headers)
                 body = html.fromstring(response.content)
                 result = etree.tostring(body, pretty_print=True, method="html")
-
+                
                 '''links availab on current web page'''
                 links = [urllib.parse.urljoin(response.url, url) for url in body.xpath('//a/@href')]
-
+                
                 '''extracs page text'''
                 page_text = [text_from_html(response.content)]
                 #print(page_text)
-
+                
                 '''dataframe of link, anchor text, local context'''
                 dfs = link_content(response.text)
-
+                
                 try :
                     ''''dataframe with score of anchor text'''
                     df_a_score = ANN_FOR_ANCHOR(dfs, df_train)
-
+                    
                     '''page score calculation'''
                     page_score = ANN_FOR_PAGE(page_text, df_train)
-
+                    
                     '''total link score calculation'''
                     final_score = []
                     for ind in df_a_score.index :
                         final_score.append(0.6*df_a_score['Predictions'][ind] + 0.4*page_score)
-
+                        
                     df_a_score['Final Score'] = final_score
-
+                    
                     '''link sorting according to final score'''
                     df_a_score.sort_values(by = ['Final Score'])
-
-
+                    
+                    
                     for ind in df_a_score.index:
-
+                        
                         '''if final score is greater than threshold , page is relevant'''
                         if df_a_score['Final Score'][ind] > threshold :
                             '''append links according to score'''
                             urlq.append(df_a_score['link'][ind])
-
+                            
                             '''adds homepage of crawled sites'''
                             home.add('/'.join(df_a_score['link'][ind].split("/")[0:3]))
                             '''list will be sent to mihir'''
@@ -479,17 +472,17 @@ try :
                                 cursor.execute(sql_dark,(df_a_score['link'][ind],'Active',))
                                 connection.commit()
                                 print("count = " + str(len(found)))
-
+                            
                             print (str(countlink) +"{:<5}".format(" ")+ df_a_score['link'][ind], end= "\n\n" )
-
+                            
                             if len(found) >= mihir*10:
                                 break
                             '''total number of links'''
                             countlink += 1
-
+                           
                     '''total number of sites visited'''
                     countpage += 1
-
+                
                 except Exception as e:
                     print(str(e))
                     renew_tor_ip()
@@ -514,9 +507,9 @@ try :
     print(total_links)
     df_send = pd.DataFrame(data = {'links of {}'.format(query[16:]):list(found)})
     df_send.to_csv('childporn.csv')
-
+    
 except Exception as e:
-	print(str(e))
+    print(str(e))
 if (connection.is_connected()):
         cursor.close()
         connection.close()
