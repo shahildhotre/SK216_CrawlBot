@@ -17,6 +17,7 @@ Day 2 Updates
 #Added Default Auto crawling Feature on SearchPage
 	->for focused auomatic crawling in the domain as per the problem statement
 
+Day 3 Updates
 
-	
-
+#As per the suggestions given on day 2
+	->Combined surface web crawler and dark web crawler into a single python file i.e. combined.py
