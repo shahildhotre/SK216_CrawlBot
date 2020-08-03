@@ -1,6 +1,17 @@
 <?php
 session_start();
-#error_reporting(E_ERROR | E_WARNING | E_PARSE);
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+$dbServername = "localhost:3308";
+$dbUsername = "root";
+$dbPassword = "";
+$dbName = "sih";
+
+$conn = mysqli_connect($dbServername, $dbUsername, $dbPassword, $dbName);
+
+$sql_delete1 = "TRUNCATE TABLE dark";
+mysqli_query($conn,$sql_delete1);
+$sql_delete2 = "TRUNCATE TABLE surface";
+mysqli_query($conn,$sql_delete2);
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +31,6 @@ session_start();
 			},5000)
 		})
 	</script>
-
 </head>
 <body>
 <h1>CrawlBot</h1>
@@ -30,6 +40,11 @@ if($_SESSION['disp'] == 'on'){
 	$webtype = $_SESSION['type'];
 	$number = $_SESSION['num'];
 ?>
+	<form method="POST">
+		<button type="submit" name="auto"  value="yes" style="margin-left:150px; width: 180px;">Auto Crawl</button>
+	</form>
+	
+
 	<form action="web.php" method="POST">
 		<div class="container">
 		<label>Keyword Search           </label>
@@ -64,6 +79,11 @@ if($_SESSION['disp'] == 'on'){
 	$_SESSION['disp'] = 'off';
 }else{
 ?>
+
+	<form method="POST">
+		<button type="submit" name="auto"  value="yes" style="margin-left:150px; width: 180px;">Auto Crawl</button>
+	</form>
+
 	<form action="web.php" method="POST">
 		<div class="container">
 		<label>Keyword Search           </label>
@@ -101,6 +121,13 @@ function execInBackground($cmd) {
 
 <?php
 ini_set('max_execution_time', 600);
+
+if(isset($_POST['auto'])){
+	execInBackground("python combined.py pornography surfaceweb 1000 > out_surface.log");
+	execInBackground("python combined.py pornography darkweb 1000 > out_dark.log");
+	header("Refresh:0");
+}
+
 if(isset($_POST['submit'])){
 	$_SESSION['disp'] = 'on';
 	$key = $_POST['key'];
@@ -110,10 +137,10 @@ if(isset($_POST['submit'])){
 	$number = $_POST['num'];
 	$_SESSION['num'] = $number;
 	if($webtype=="surface"){
-		execInBackground("python surface_crawler.py $key $number > out_surface.log");
+		execInBackground("python combined.py $key surfaceweb $number > out_surface.log");
 		header("Refresh:0");
 	}else{
-		execInBackground("python dark_crawler.py $key $number > out_dark.log");
+		execInBackground("python combined.py $key darkweb $number > out_dark.log");
 		header("Refresh:0");
 	}
 }
