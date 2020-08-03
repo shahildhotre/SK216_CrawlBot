@@ -455,7 +455,7 @@ if web_type == 'darkweb':
         countpage = 0
         
         '''threshold value to check relevancy'''
-        threshold = 0.3
+        threshold = 0.4
         
         sql_dark = """INSERT INTO dark(`link_url`, `link_status`) VALUES(%s,%s)"""
         
