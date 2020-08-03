@@ -123,8 +123,8 @@ function execInBackground($cmd) {
 ini_set('max_execution_time', 600);
 
 if(isset($_POST['auto'])){
-	execInBackground("python surface_crawler.py pornography 1000 > out_surface.log");
-	execInBackground("python dark_crawler.py pornography 1000 > out_dark.log");
+	execInBackground("python combined.py pornography surfaceweb 1000 > out_surface.log");
+	execInBackground("python combined.py pornography darkweb 1000 > out_dark.log");
 	header("Refresh:0");
 }
 
@@ -137,10 +137,10 @@ if(isset($_POST['submit'])){
 	$number = $_POST['num'];
 	$_SESSION['num'] = $number;
 	if($webtype=="surface"){
-		execInBackground("python surface_crawler.py $key $number > out_surface.log");
+		execInBackground("python combined.py $key surfaceweb $number > out_surface.log");
 		header("Refresh:0");
 	}else{
-		execInBackground("python dark_crawler.py $key $number > out_dark.log");
+		execInBackground("python combined.py $key darkweb $number > out_dark.log");
 		header("Refresh:0");
 	}
 }
