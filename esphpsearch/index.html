@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crawlbot</title>
+  <link rel = "stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+    <header>
+      <div class="title">
+        <h1>Crawlb<img id="myImage" onclick="changeImage()" src="pic_bulboff.gif" width="34" height="60">t</h1>
+        <script>
+        function changeImage() {
+          var image = document.getElementById('myImage');
+          if (image.src.match("bulbon")) {
+            image.src = "pic_bulboff.gif";
+          } else {
+            image.src = "pic_bulbon.gif";
+          }
+        }
+        </script>
+      </div>
+      <div class="button">
+        <a href="http://localhost/esphpsearch/darkweb_index.php" class="btn">Dark Web</a>
+        <a href="http://localhost/esphpsearch/surfaceweb_index.php" class="btn">Surface Web</a>
+        <a href="http://localhost/esphpsearch/web_index.php" class="btn">Web</a>
+        <a href="#" class="btn">Dashboard</a>
+      </div>
+      <p>"A tool to fight Cybercrime"</p>
+      <div>
+        <ul>
+          <li><a href="#" class="btn">Live Crawling</a></li>
+        </ul>
+      </div>
+    </header>
+</body>
+</html>
+
+<!--
+<h1>Crawlb<img id="myImage" src="pic_bulbon.gif" width="34" height="60">t</h1>
+<script type="text/javascript">
+  var hidden = false;
+  setInterval(function(){
+      document.getElementById("myImage").style.visibility= hidden ? "visible" : "hidden";
+      hidden = !hidden;
+  },500);
+</script>
+
+-->
