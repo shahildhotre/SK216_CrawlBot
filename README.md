@@ -1,1 +1,1 @@
-# SK216
+# CrawlBot: A Domain-Specific Pseudonymous Crawler
